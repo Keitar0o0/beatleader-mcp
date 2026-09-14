@@ -10,13 +10,34 @@ The service only reads public data, and the remote MCP is deployed on Vercel
 
 | Tool | Capability |
 |---|---|
-| `get_player` | Get a profile, PP, and ranks by player ID, alias, or profile URL |
-| `list_player_scores` | Filter scores by time, stars, difficulty, mode, and song, with up to 100 results per page |
-| `get_player_history` | Get 1–90 days of daily statistics snapshots |
+| `get_player` | Get a profile, PP, and ranks; select stats, clans, socials, and badges with `include` |
+| `search_players` | Find nickname candidates by country and total PP range, with component PP sorting |
+| `search_maps` | Search leaderboard difficulties by stars, ratings, mode, difficulty and mapper IDs |
+| `list_player_scores` | Filter scores by time, stars, percentage accuracy, modifiers, difficulty, mode and song, with up to 100 results per page |
+| `get_player_history` | Get 1–90 daily snapshots and changes between actual first and last dates |
 | `get_leaderboard` | Get map details and leaderboard scores, with up to 50 results per page |
-| `summarize_player_scores` | Read up to 250 scores, calculate grouped statistics, and suggest up to 5 previously played maps |
+| `analyze_player` | Read up to 250 scores, calculate grouped statistics, and suggest up to 5 previously played maps |
 
-All five tools query public GET endpoints at `https://api.beatleader.com`
+All seven tools query public GET endpoints at `https://api.beatleader.com`
+
+`get_player` accepts a player ID, alias, or profile URL. `include` defaults to `[]` for the basic profile
+
+```json
+{ "player": "76561198317719585", "include": ["stats", "clans", "socials", "badges"] }
+```
+
+Returns `sources`, `context`, `data`, and `availability`. Statistics use percentage accuracy and ISO 8601 times. Selected sections have status `available`, `unavailable`, or `invalid`; an empty list represents an available section with zero entries
+
+All tools return `sources`, `context` and `data`; paginated results use `pagination: { page, count, total }`. Scores use `accuracyPercent`, `playedAt` and `postedAt`. Analysis candidates are in `data.estimates.practiceCandidates`
+
+```js
+search_players({ search: "AQA", country: "CN", ppType: "acc" })
+search_maps({ starsFrom: 6, starsTo: 8, mode: "Standard", type: "ranked" })
+list_player_scores({ player: "76561198317719585", accFromPercent: 80, modifiers: "FS" })
+analyze_player({ player: "76561198317719585", rankedOnly: true, maxPages: 2 })
+```
+
+Profile, history and analysis support `general`, `noMods`, `noPause`. Search, score listing and leaderboard queries also support `golf`, `sCPM`, `speedrun`, `speedrunBackup`, `funny`, `backUp`, `leftLeader`
 
 ## Connection options
 
@@ -58,7 +79,7 @@ Use this remote configuration
 }
 ```
 
-Remote HTTP calls require an explicit player ID, alias, or profile URL
+Player tools over HTTP require an explicit player ID, alias, or profile URL; search tools accept their query filters directly
 
 ## Vercel deployment
 
@@ -107,6 +128,8 @@ After local verification, run `git restore -- plugins/beatleader-mcp/.mcp.json` 
 
 ## Usage examples
 
+The beatleader-helper Skill combines existing queries for trends, Top Plays, PP composition, player comparisons, map selection and follow-up reviews. Charts and files use the client's available tools
+
 - 「My profile is https://beatleader.com/u/YOUR_ID — review my recent performance」
 - 「Which previously played Standard maps from the past month should I practice again?」
 - 「I want to practice accuracy today — give me three previously played maps and targets to watch」
@@ -126,7 +149,7 @@ After local verification, run `git restore -- plugins/beatleader-mcp/.mcp.json` 
 plugins/beatleader-mcp/
   .codex-plugin/plugin.json            Plugin metadata
   .mcp.json                            Default Vercel MCP connection
-  skills/beatleader-coach/SKILL.md     Analysis and practice workflow
+  skills/beatleader-helper/SKILL.md     Analysis and practice workflow
 src/                                   Tools, data processing, and MCP entry points
 index.js                               Vercel Express Function entry point
 scripts/                               Local configuration and MCP verification

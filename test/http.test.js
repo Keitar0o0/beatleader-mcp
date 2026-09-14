@@ -23,7 +23,7 @@ test('HTTP 工具发现、并行客户端、输入校验与请求边界', async 
     await Promise.all(clients.map(c => c.connect(new StreamableHTTPClientTransport(url))));
     for (const c of clients) {
       const result = await c.listTools();
-      assert.equal(result.tools.length, 5);
+      assert.deepEqual(result.tools.map(t => t.name).sort(), ['analyze_player', 'get_leaderboard', 'get_player', 'get_player_history', 'list_player_scores', 'search_maps', 'search_players']);
       assert.ok(result.tools.every(t => t.annotations.readOnlyHint && t.inputSchema));
       const invalid = await c.callTool({ name: 'get_player', arguments: { player: '../123' } });
       assert.equal(invalid.isError, true);

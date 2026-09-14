@@ -10,13 +10,36 @@
 
 | 工具 | 能力 |
 |---|---|
-| `get_player` | 通过玩家 ID、别名或主页链接查询资料、PP 与排名 |
-| `list_player_scores` | 按时间、星级、难度、模式和歌曲筛选成绩，单页最多 100 条 |
-| `get_player_history` | 查询 1～90 天的每日统计快照 |
+| `get_player` | 查询基础资料、PP 与排名，通过 `include` 选取统计、Clan、社交和徽章 |
+| `search_players` | 按昵称、国家和总 PP 区间找玩家，支持分项 PP 排序 |
+| `search_maps` | 按星级、评级分量、模式、难度和 mapper ID 搜索谱面 |
+| `list_player_scores` | 按时间、星级、准确率、修改器、难度、模式和歌曲筛选成绩，单页最多 100 条 |
+| `get_player_history` | 查询 1～90 天每日统计快照，计算实际首末日期间的变化 |
 | `get_leaderboard` | 查询谱面详情与排行榜，单页最多 50 条 |
-| `summarize_player_scores` | 读取最多 250 条成绩，计算分组统计并推荐最多 5 个已玩谱面 |
+| `analyze_player` | 读取最多 250 条成绩，计算分组统计并推荐最多 5 个已玩谱面 |
 
-五个工具统一查询 `https://api.beatleader.com` 的公开 GET 接口
+七个工具统一查询 `https://api.beatleader.com` 的公开 GET 接口
+
+玩家资料按需查询，`include` 默认 `[]`，可组合 `stats`、`clans`、`socials`、`badges`
+
+```json
+{ "player": "76561198317719585", "include": ["stats", "clans", "socials", "badges"] }
+```
+
+`get_player` 返回 `sources`、`context`、`data` 和 `availability`；统计准确率使用百分比，时间使用 ISO 8601，各部分状态为 `available`、`unavailable` 或 `invalid`，空列表表示已获取且条目数为零
+
+所有工具统一返回 `sources`、`context`、`data`，分页使用 `pagination: { page, count, total }`；成绩准确率使用 `accuracyPercent`，时间使用 `playedAt` / `postedAt`，分析候选位于 `data.estimates.practiceCandidates`
+
+常用调用参数
+
+```js
+search_players({ search: "AQA", country: "CN", ppType: "acc" })
+search_maps({ starsFrom: 6, starsTo: 8, mode: "Standard", type: "ranked" })
+list_player_scores({ player: "76561198317719585", accFromPercent: 80, modifiers: "FS" })
+analyze_player({ player: "76561198317719585", rankedOnly: true, maxPages: 2 })
+```
+
+玩家资料、历史和分析支持 `general`、`noMods`、`noPause`；搜索、成绩列表和单谱查询还支持 `golf`、`sCPM`、`speedrun`、`speedrunBackup`、`funny`、`backUp`、`leftLeader`
 
 ## 接入方式
 
@@ -58,7 +81,7 @@ codex plugin add beatleader-mcp@beatleader
 }
 ```
 
-远程 HTTP 调用要求显式提供玩家 ID、别名或主页链接
+远程 HTTP 的玩家工具要求显式提供玩家 ID、别名或主页链接；搜索工具直接接受搜索条件
 
 ## Vercel 部署
 
@@ -107,7 +130,11 @@ codex plugin add beatleader-mcp@beatleader
 
 ## 使用示例
 
+beatleader-helper Skill 将现有查询组合成趋势解读、Top Plays、PP 构成、玩家比较、选图与复测流程；图表和文件使用客户端能力生成
+
 - 「我的主页是 https://beatleader.com/u/你的ID，看看我的近期表现」
+- 「看看我的 Top 8 Ranked 成绩，再展示最近 90 天的 PP 趋势」
+- 「比较我和这位玩家共同谱面的表现，说明样本范围」
 - 「最近一个月，Standard 模式里哪些旧图适合再练？」
 - 「今天练准确率，给我三张旧图和观察目标」
 - 「用这段对话的练前数据，比较这张图的新成绩」
@@ -126,7 +153,7 @@ codex plugin add beatleader-mcp@beatleader
 plugins/beatleader-mcp/
   .codex-plugin/plugin.json            插件元数据
   .mcp.json                            默认 Vercel MCP 连接
-  skills/beatleader-coach/SKILL.md     分析与练习流程
+  skills/beatleader-helper/SKILL.md     分析与练习流程
 src/                                   工具、数据处理及 MCP 入口
 index.js                               Vercel Express Function 入口
 scripts/                               本机配置与 MCP 验证
