@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "beatleader": {
+      "url": "https://beatleader-mcp.vercel.app/mcp"
+    }
+  }
+}

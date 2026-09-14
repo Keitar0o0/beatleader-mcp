@@ -1,0 +1,25 @@
+{
+  "name": "beatleader-mcp",
+  "version": "0.1.0+codex.20260910132735",
+  "description": "Review public BeatLeader scores and choose evidence-based practice goals",
+  "author": {
+    "name": "Keitaro"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "BeatLeader Helper",
+    "shortDescription": "Review scores and choose practice maps",
+    "longDescription": "Query public BeatLeader profiles, scores, history, and leaderboards to review performance, choose previously played maps, and compare later results",
+    "developerName": "Keitaro",
+    "category": "Productivity",
+    "capabilities": [
+      "Read"
+    ],
+    "defaultPrompt": [
+      "Review my recent BeatLeader performance",
+      "Suggest previously played maps for practice",
+      "Help me review my latest Beat Saber practice"
+    ]
+  },
+  "mcpServers": "./.mcp.json"
+}

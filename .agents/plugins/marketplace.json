@@ -1,0 +1,20 @@
+{
+  "name": "beatleader",
+  "interface": {
+    "displayName": "BeatLeader"
+  },
+  "plugins": [
+    {
+      "name": "beatleader-mcp",
+      "source": {
+        "source": "local",
+        "path": "./plugins/beatleader-mcp"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

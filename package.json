@@ -1,0 +1,19 @@
+{
+  "name": "beatleader-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "BeatLeader scores, performance reviews, and practice suggestions",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/server.js",
+    "start:http": "node src/http.js",
+    "test": "node --test test/*.test.js",
+    "smoke": "node scripts/smoke.js",
+    "configure": "node scripts/configure.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "zod": "4.6.1"
+  }
+}
